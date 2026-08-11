@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Escala Reclame Aqui - Operação RA</title>
+  <title>Escala Hora a Hora - Reclame Aqui</title>
   <style>
     :root {
       --bg-dark: #121212;
@@ -59,7 +59,7 @@
       border-radius: 8px;
     }
 
-    .admin-controls input[type="password"] {
+    .admin-controls input, .admin-controls select {
       padding: 8px 12px;
       border-radius: 4px;
       border: 1px solid var(--border-color);
@@ -78,6 +78,13 @@
     .btn-draw { background-color: #10b981; color: #fff; }
     .btn-unlock { background-color: #eab308; color: #000; }
     .btn-lock { background-color: #ef4444; color: #fff; }
+
+    .time-selector {
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
     .columns-container {
       display: grid;
@@ -126,10 +133,6 @@
       border-color: var(--accent-color);
     }
 
-    .agent-card.draggable:active {
-      cursor: grabbing;
-    }
-
     .notes-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -159,8 +162,8 @@
 <body>
 
   <div class="header">
-    <h2>Escala Reclame Aqui (09:00 às 17:00)</h2>
-    <button class="btn btn-draw" id="btnSorteio">🎲 Realizar Sorteio Automático</button>
+    <h2>Escala Reclame Aqui - Hora a Hora (09:00 às 17:00)</h2>
+    <button class="btn btn-draw" id="btnSorteio">🎲 Sortear Escala Hora a Hora</button>
   </div>
 
   <div class="report-panel">
@@ -175,6 +178,22 @@
     <button class="btn btn-lock" id="btnLock" style="display:none;">Bloquear novamente</button>
   </div>
 
+  <!-- Seleção do Horário Visualizado -->
+  <div class="time-selector">
+    <label for="selectHorario"><strong>Selecione o Horário para Visualizar/Ajustar:</strong></label>
+    <select id="selectHorario">
+      <option value="09:00">09:00 - 10:00</option>
+      <option value="10:00">10:00 - 11:00</option>
+      <option value="11:00">11:00 - 12:00</option>
+      <option value="12:00">12:00 - 13:00</option>
+      <option value="13:00">13:00 - 14:00</option>
+      <option value="14:00">14:00 - 15:00</option>
+      <option value="15:00">15:00 - 16:00</option>
+      <option value="16:00">16:00 - 17:00</option>
+    </select>
+  </div>
+
+  <!-- Quadro das Casas -->
   <div class="columns-container">
     <div class="house-column" id="col-pixbet" data-house="Pixbet">
       <div class="house-title">Pixbet</div>
@@ -220,23 +239,37 @@
     const db = getDatabase(app);
 
     let colaboradores = ["Amanda Lima", "Maria Eugênia", "Wanessa", "Áurea", "Lucas Silva", "Beatriz Costa"];
+    const horarios = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"];
 
     const today = new Date().toLocaleDateString('pt-BR');
     document.getElementById('lblReportDate').innerHTML = `<strong>Relatório do Dia (${today}):</strong>`;
 
-    // Referências do Firebase
+    let escalaGlobal = {};
+    const selectHorario = document.getElementById('selectHorario');
+
+    // Referências Firebase
     const escalaRef = ref(db, 'escala_ra/atual');
     const reportRef = ref(db, 'escala_ra/relatorio');
     const notesRef = ref(db, 'escala_ra/notas');
 
-    // Escutar mudanças na Escala (Sincronização em Tempo Real)
+    // Escutar Mudanças da Escala
     onValue(escalaRef, (snapshot) => {
-      const data = snapshot.val() || {};
+      escalaGlobal = snapshot.val() || {};
+      renderizarHorario(selectHorario.value);
+    });
+
+    selectHorario.addEventListener('change', (e) => {
+      renderizarHorario(e.target.value);
+    });
+
+    function renderizarHorario(horario) {
       const casas = ['col-pixbet', 'col-betdasorte', 'col-ganheibet'];
       casas.forEach(id => document.querySelector(`#${id} .cards-list`).innerHTML = '');
 
-      Object.keys(data).forEach(id => {
-        const item = data[id];
+      const dadosHora = escalaGlobal[horario] || {};
+
+      Object.keys(dadosHora).forEach(id => {
+        const item = dadosHora[id];
         const card = document.createElement('div');
         card.className = 'agent-card';
         card.id = id;
@@ -249,9 +282,28 @@
       });
 
       if (isEditable) enableDragAndDrop();
+    }
+
+    // Sorteio Automático Hora a Hora
+    document.getElementById('btnSorteio').addEventListener('click', () => {
+      const escalaPayload = {};
+      const casas = ['col-pixbet', 'col-betdasorte', 'col-ganheibet'];
+
+      horarios.forEach((hora) => {
+        const embaralhados = [...colaboradores].sort(() => Math.random() - 0.5);
+        escalaPayload[hora] = {};
+
+        embaralhados.forEach((nome, index) => {
+          const cardId = `agent-${index}`;
+          const casaId = casas[index % casas.length];
+          escalaPayload[hora][cardId] = { nome: nome, casaId: casaId };
+        });
+      });
+
+      set(escalaRef, escalaPayload);
     });
 
-    // Escutar mudanças no Relatório e Notas
+    // Relatório e Notas
     onValue(reportRef, (snapshot) => {
       if (document.activeElement !== document.getElementById('txtReport')) {
         document.getElementById('txtReport').value = snapshot.val() || '';
@@ -268,38 +320,17 @@
       }
     });
 
-    // Sorteio e envio para o Firebase
-    document.getElementById('btnSorteio').addEventListener('click', () => {
-      const embaralhados = [...colaboradores].sort(() => Math.random() - 0.5);
-      const casas = ['col-pixbet', 'col-betdasorte', 'col-ganheibet'];
-      const escalaPayload = {};
-
-      embaralhados.forEach((nome, index) => {
-        const cardId = `agent-${index}`;
-        const casaId = casas[index % casas.length];
-        escalaPayload[cardId] = { nome: nome, casaId: casaId };
-      });
-
-      set(escalaRef, escalaPayload);
-    });
-
-    // Atualizar Relatório no Firebase
-    document.getElementById('txtReport').addEventListener('input', (e) => {
-      set(reportRef, e.target.value);
-    });
-
-    // Atualizar Caixas de Notas no Firebase
+    document.getElementById('txtReport').addEventListener('input', (e) => set(reportRef, e.target.value));
+    
     document.querySelectorAll('.note-input').forEach(el => {
       el.addEventListener('input', () => {
         const payload = {};
-        for (let i = 1; i <= 6; i++) {
-          payload[`note${i}`] = document.getElementById(`note${i}`).value;
-        }
+        for (let i = 1; i <= 6; i++) payload[`note${i}`] = document.getElementById(`note${i}`).value;
         set(notesRef, payload);
       });
     });
 
-    // Controle de Edição/Admin
+    // Controle Admin
     let isEditable = false;
     const btnUnlock = document.getElementById('btnUnlock');
     const btnLock = document.getElementById('btnLock');
@@ -331,9 +362,7 @@
       document.querySelectorAll('.agent-card').forEach(card => {
         card.setAttribute('draggable', true);
         card.classList.add('draggable');
-        card.ondragstart = (e) => {
-          e.dataTransfer.setData('text/plain', e.target.id);
-        };
+        card.ondragstart = (e) => e.dataTransfer.setData('text/plain', e.target.id);
       });
     }
 
@@ -361,11 +390,11 @@
         const cardId = e.dataTransfer.getData('text/plain');
         const card = document.getElementById(cardId);
         if (card) {
+          const horaAtual = selectHorario.value;
           const newCasaId = column.id;
           const agentName = card.innerText;
 
-          // Atualiza a posição no Firebase
-          set(ref(db, `escala_ra/atual/${cardId}`), {
+          set(ref(db, `escala_ra/atual/${horaAtual}/${cardId}`), {
             nome: agentName,
             casaId: newCasaId
           });
