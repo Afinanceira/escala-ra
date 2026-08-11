@@ -33,7 +33,6 @@
 
     .header h2 { margin: 0; font-size: 1.3rem; }
 
-    /* Relatório */
     .report-panel {
       background: var(--card-bg);
       padding: 10px 15px;
@@ -54,7 +53,6 @@
       margin-top: 5px;
     }
 
-    /* Admin / Senha */
     .admin-controls {
       display: flex;
       gap: 10px;
@@ -87,7 +85,6 @@
     .btn-unlock { background-color: #eab308; color: #000; }
     .btn-lock { background-color: #ef4444; color: #fff; }
 
-    /* Tabela Estilo Grid Compacto */
     .escala-table {
       width: 100%;
       border-collapse: collapse;
@@ -120,7 +117,6 @@
       width: 100px;
     }
 
-    /* Cards Verdes do Estilo Antigo */
     .agent-pill {
       background-color: var(--green-card);
       color: #ffffff;
@@ -142,7 +138,6 @@
       opacity: 0.85;
     }
 
-    /* 6 Caixas de Texto Operacionais */
     .notes-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -179,7 +174,7 @@
 
   <div class="header">
     <h2>Escala Reclame Aqui (09:00 às 17:00)</h2>
-    <button class="btn btn-draw" id="btnSorteio">🎲 Sortear Escala Hora a Hora</button>
+    <button class="btn btn-draw" id="btnSorteio">🎲 Sortear Escala Balanceada</button>
   </div>
 
   <div class="report-panel">
@@ -194,7 +189,6 @@
     <button class="btn btn-lock" id="btnLock" style="display:none;">Bloquear novamente</button>
   </div>
 
-  <!-- TABELA COMPLETA DA ESCALA HORA A HORA -->
   <table class="escala-table">
     <thead>
       <tr>
@@ -205,18 +199,17 @@
       </tr>
     </thead>
     <tbody id="tableBody">
-      <!-- As linhas de 09:00 às 17:00 são geradas dinamicamente -->
     </tbody>
   </table>
 
-  <h3>Observações & Pendências</h3>
+  <h3>Equipe & Observações (Preencha os nomes para o sorteio)</h3>
   <div class="notes-grid">
-    <div class="note-box"><label>Caixa 1:</label><textarea id="note1" class="note-input"></textarea></div>
-    <div class="note-box"><label>Caixa 2:</label><textarea id="note2" class="note-input"></textarea></div>
-    <div class="note-box"><label>Caixa 3:</label><textarea id="note3" class="note-input"></textarea></div>
-    <div class="note-box"><label>Caixa 4:</label><textarea id="note4" class="note-input"></textarea></div>
-    <div class="note-box"><label>Caixa 5:</label><textarea id="note5" class="note-input"></textarea></div>
-    <div class="note-box"><label>Caixa 6:</label><textarea id="note6" class="note-input"></textarea></div>
+    <div class="note-box"><label>Caixa 1:</label><textarea id="note1" class="note-input" placeholder="Nome 1"></textarea></div>
+    <div class="note-box"><label>Caixa 2:</label><textarea id="note2" class="note-input" placeholder="Nome 2"></textarea></div>
+    <div class="note-box"><label>Caixa 3:</label><textarea id="note3" class="note-input" placeholder="Nome 3"></textarea></div>
+    <div class="note-box"><label>Caixa 4:</label><textarea id="note4" class="note-input" placeholder="Nome 4"></textarea></div>
+    <div class="note-box"><label>Caixa 5:</label><textarea id="note5" class="note-input" placeholder="Nome 5"></textarea></div>
+    <div class="note-box"><label>Caixa 6:</label><textarea id="note6" class="note-input" placeholder="Nome 6"></textarea></div>
   </div>
 
   <script type="module">
@@ -236,7 +229,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    let colaboradores = ["Amanda Lima", "Maria Eugênia", "Wanessa", "Áurea", "Lucas Silva", "Beatriz Costa"];
     const horarios = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"];
     const casas = ["pixbet", "betdasorte", "ganheibet"];
 
@@ -249,7 +241,7 @@
     const reportRef = ref(db, 'escala_ra/relatorio');
     const notesRef = ref(db, 'escala_ra/notas');
 
-    // Escutar Mudanças no Firebase
+    // Sincronização da Escala
     onValue(escalaRef, (snapshot) => {
       escalaGlobal = snapshot.val() || {};
       renderizarTabela();
@@ -261,7 +253,6 @@
 
       horarios.forEach(hora => {
         const tr = document.createElement('tr');
-        
         let rowHTML = `<td class="time-cell">${hora}</td>`;
 
         casas.forEach(casa => {
@@ -280,33 +271,77 @@
       });
     }
 
-    // Sortear Escala Completa Hora a Hora
+    function obterColaboradoresDasCaixas() {
+      const lista = [];
+      for (let i = 1; i <= 6; i++) {
+        const valor = document.getElementById(`note${i}`).value.trim();
+        if (valor !== '') lista.push(valor);
+      }
+      return lista;
+    }
+
+    // EMBARALHAMENTO JUSTO (Fisher-Yates Shuffle)
+    function embaralharArray(arr) {
+      const copia = [...arr];
+      for (let i = copia.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copia[i], copia[j]] = [copia[j], copia[i]];
+      }
+      return copia;
+    }
+
+    // ALGORITMO IGUALITÁRIO DE RODÍZIO HORA A HORA
     document.getElementById('btnSorteio').addEventListener('click', () => {
+      const equipe = obterColaboradoresDasCaixas();
+
+      if (equipe.length < 3) {
+        alert("Cadastre pelo menos 3 colaboradores nas Caixas de Texto para que o rodízio seja igualitário!");
+        return;
+      }
+
       const escalaPayload = {};
+      
+      // 1. Embaralha totalmente a ordem inicial (independe de qual caixa foi preenchida)
+      let filaRodizio = embaralharArray(equipe);
+
+      // Deslocamento diário baseado na data para gerar variação diária/mensal
+      const deslocamentoDia = new Date().getDate() % equipe.length;
+      for (let d = 0; d < deslocamentoDia; d++) {
+        filaRodizio.push(filaRodizio.shift());
+      }
+
+      let ponteiro = 0;
 
       horarios.forEach(hora => {
-        const embaralhados = [...colaboradores].sort(() => Math.random() - 0.5);
+        const alocacaoHora = [];
+
+        // Seleciona os 3 colaboradores subsequentes na fila circular
+        for (let c = 0; c < 3; c++) {
+          alocacaoHora.push(filaRodizio[ponteiro % filaRodizio.length]);
+          ponteiro++;
+        }
+
+        // Embaralha quem fica em qual casa dentro da hora específica
+        const casasEmbaralhadas = embaralharArray(alocacaoHora);
+
         escalaPayload[hora] = {
-          pixbet: embaralhados[0] || '-',
-          betdasorte: embaralhados[1] || '-',
-          ganheibet: embaralhados[2] || '-'
+          pixbet: casasEmbaralhadas[0],
+          betdasorte: casasEmbaralhadas[1],
+          ganheibet: casasEmbaralhadas[2]
         };
       });
 
       set(escalaRef, escalaPayload);
     });
 
-    // Função para Trocar Colaborador de Célula (Quando Desbloqueado)
     window.trocarAgente = function(hora, casa, nomeAtual) {
       if (!isEditable) return;
-
       const novoNome = prompt(`Alterar colaborador para ${casa.toUpperCase()} às ${hora}:`, nomeAtual);
       if (novoNome !== null && novoNome.trim() !== '') {
         set(ref(db, `escala_ra/atual/${hora}/${casa}`), novoNome.trim());
       }
     };
 
-    // Relatório e Notas
     onValue(reportRef, (snapshot) => {
       if (document.activeElement !== document.getElementById('txtReport')) {
         document.getElementById('txtReport').value = snapshot.val() || '';
@@ -333,7 +368,6 @@
       });
     });
 
-    // Controle Admin
     let isEditable = false;
     const btnUnlock = document.getElementById('btnUnlock');
     const btnLock = document.getElementById('btnLock');
