@@ -3,213 +3,358 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Escala Reclame Aqui - Tabela Completa</title>
+  <title>Escala Diária de Operação - Reclame Aqui</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-dark: #0f172a;
-      --card-bg: #1e293b;
-      --accent-color: #3b82f6;
-      --border-color: #334155;
-      --text-color: #f8fafc;
-      --green-card: #22c55e;
+      --bg-main: #0b0f17;
+      --panel-bg: #151c28;
+      --panel-border: #232d3f;
+      --accent-gold: #d4af37;
+      --accent-gold-hover: #b89628;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --card-pixbet: #1e3a8a;
+      --card-betdasorte: #065f46;
+      --card-ganheibet: #854d0e;
+      --card-border: rgba(255, 255, 255, 0.12);
     }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Inter', sans-serif;
-      background-color: var(--bg-dark);
-      color: var(--text-color);
-      margin: 0;
-      padding: 15px;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      padding: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
-    .header {
+    /* Cabeçalho */
+    .app-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--panel-border);
     }
 
-    .header h2 { margin: 0; font-size: 1.3rem; }
-
-    .report-panel {
-      background: var(--card-bg);
-      padding: 10px 15px;
-      border-radius: 8px;
-      margin-bottom: 15px;
+    .app-title h1 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
     }
 
-    .report-panel textarea {
-      width: 100%;
-      height: 50px;
-      background: #0f172a;
-      border: 1px solid var(--border-color);
-      color: #fff;
-      padding: 8px;
+    .app-title p {
+      font-size: 0.825rem;
+      color: var(--text-secondary);
+      margin-top: 3px;
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 9px 18px;
       border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background-color: var(--accent-gold);
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--accent-gold-hover);
+    }
+
+    .btn-lock { background-color: #ef4444; color: #fff; }
+    .btn-unlock { background-color: #eab308; color: #000; }
+
+    /* Painel de Controle e Relatório */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .panel-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .panel-header {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+    }
+
+    textarea.report-input {
+      width: 100%;
+      height: 65px;
+      background: #0f172a;
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      padding: 10px;
+      font-family: inherit;
+      font-size: 0.875rem;
       resize: none;
-      box-sizing: border-box;
-      margin-top: 5px;
+      outline: none;
+    }
+
+    textarea.report-input:focus {
+      border-color: var(--accent-gold);
+    }
+
+    .admin-box {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
     .admin-controls {
       display: flex;
-      gap: 10px;
-      align-items: center;
-      margin-bottom: 15px;
-      background: var(--card-bg);
-      padding: 8px 12px;
-      border-radius: 8px;
+      gap: 8px;
+      margin-top: 10px;
     }
 
     .admin-controls input {
-      padding: 6px 10px;
-      border-radius: 4px;
-      border: 1px solid var(--border-color);
+      flex: 1;
+      padding: 8px 12px;
       background: #0f172a;
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
       color: #fff;
-      width: 130px;
-    }
-
-    .btn {
-      padding: 7px 14px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
       font-size: 0.85rem;
     }
 
-    .btn-draw { background-color: #10b981; color: #fff; }
-    .btn-unlock { background-color: #eab308; color: #000; }
-    .btn-lock { background-color: #ef4444; color: #fff; }
-
-    .escala-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 20px;
-      background: var(--card-bg);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-
-    .escala-table th {
-      background: #0f172a;
-      padding: 10px;
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      border-bottom: 2px solid var(--border-color);
-      color: #94a3b8;
-    }
-
-    .escala-table td {
-      padding: 8px;
-      text-align: center;
-      border-bottom: 1px solid var(--border-color);
-      font-size: 0.9rem;
-    }
-
-    .time-cell {
-      font-weight: bold;
-      color: #cbd5e1;
-      width: 100px;
-    }
-
-    .agent-pill {
-      background-color: var(--green-card);
-      color: #ffffff;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-weight: bold;
-      display: inline-block;
-      width: 85%;
-      box-sizing: border-box;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-
-    .agent-pill.editable {
-      cursor: pointer;
-      border: 1px dashed #ffffff;
-    }
-
-    .agent-pill.editable:hover {
-      opacity: 0.85;
-    }
-
-    .notes-grid {
+    /* Grade Principal das Casas */
+    .houses-container {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .house-box {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      padding: 16px;
+      min-height: 200px;
+    }
+
+    .house-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .badge-pixbet { background: #1e3a8a; color: #93c5fd; border: 1px solid #2563eb; }
+    .badge-betdasorte { background: #065f46; color: #6ee7b7; border: 1px solid #059669; }
+    .badge-ganheibet { background: #713f12; color: #fde047; border: 1px solid #ca8a04; }
+
+    .slots-list {
+      display: flex;
+      flex-direction: column;
       gap: 10px;
     }
 
-    .note-box {
-      background: var(--card-bg);
-      padding: 8px 12px;
-      border-radius: 6px;
-    }
-
-    .note-box label {
-      font-size: 0.8rem;
-      color: #94a3b8;
-      font-weight: bold;
-    }
-
-    .note-box textarea {
-      width: 100%;
-      height: 45px;
+    .slot-card {
       background: #0f172a;
-      border: 1px solid var(--border-color);
-      color: #fff;
-      padding: 6px;
-      border-radius: 4px;
-      margin-top: 4px;
-      resize: none;
-      box-sizing: border-box;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      padding: 12px 14px;
+      font-weight: 600;
+      font-size: 0.925rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s;
+    }
+
+    .slot-card.editable {
+      cursor: pointer;
+      border-color: var(--accent-gold);
+    }
+
+    .slot-card.editable:hover {
+      background: #1e293b;
+    }
+
+    .slot-card .tag-icon {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      font-weight: 400;
+    }
+
+    /* Caixas de Observação / Equipe */
+    .team-panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .team-input-box label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .team-input-box input {
+      width: 100%;
+      padding: 8px 10px;
+      background: #0f172a;
+      border: 1px solid var(--panel-border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .team-input-box input:focus {
+      border-color: var(--accent-gold);
     }
   </style>
 </head>
 <body>
 
-  <div class="header">
-    <h2>Escala Reclame Aqui (09:00 às 17:00)</h2>
-    <button class="btn btn-draw" id="btnSorteio">🎲 Sortear Escala Balanceada</button>
+  <!-- Cabeçalho Principal -->
+  <div class="app-header">
+    <div class="app-title">
+      <h1>Escala Reclame Aqui — Turno Único (09:00 às 17:00)</h1>
+      <p id="subDate">Gestão Diária de Operação e Rodízio Balanceado</p>
+    </div>
+    <button class="btn btn-primary" id="btnSorteio">
+      🔄 Executar Rodízio Diário
+    </button>
   </div>
 
-  <div class="report-panel">
-    <label id="lblReportDate"><strong>Relatório do Dia:</strong></label>
-    <textarea id="txtReport" placeholder="Anotações gerais do relatório diário..."></textarea>
+  <!-- Painel de Relatório e Trava Admin -->
+  <div class="dashboard-grid">
+    <div class="panel-card">
+      <div class="panel-header" id="lblReportDate">Relatório do Dia</div>
+      <textarea id="txtReport" class="report-input" placeholder="Anotações e resumo do relatório operacional do dia..."></textarea>
+    </div>
+
+    <div class="panel-card admin-box">
+      <div>
+        <div class="panel-header">Controle Supervisor</div>
+        <div id="lockStatus" style="font-size: 0.825rem; color: var(--text-secondary);">
+          🔒 Status: <strong>Bloqueado (Leitura)</strong>
+        </div>
+      </div>
+      <div class="admin-controls">
+        <input type="password" id="adminPassword" placeholder="Senha Admin">
+        <button class="btn btn-unlock" id="btnUnlock">Desbloquear</button>
+        <button class="btn btn-lock" id="btnLock" style="display:none;">Bloquear</button>
+      </div>
+    </div>
   </div>
 
-  <div class="admin-controls">
-    <span id="lockStatus">🔒 <strong>Modo: Bloqueado (Apenas Leitura)</strong></span>
-    <input type="password" id="adminPassword" placeholder="Senha Admin">
-    <button class="btn btn-unlock" id="btnUnlock">Desbloquear para Edição</button>
-    <button class="btn btn-lock" id="btnLock" style="display:none;">Bloquear novamente</button>
+  <!-- Casas da Operação -->
+  <div class="houses-container">
+    <!-- PIXBET (2 Vagas) -->
+    <div class="house-box">
+      <span class="house-badge badge-pixbet">Pixbet — 2 Colaboradores</span>
+      <div class="slots-list">
+        <div class="slot-card" id="card-pixbet1" onclick="trocarAgente('pixbet1')">
+          <span id="txt-pixbet1">-</span>
+          <span class="tag-icon">Vaga 1</span>
+        </div>
+        <div class="slot-card" id="card-pixbet2" onclick="trocarAgente('pixbet2')">
+          <span id="txt-pixbet2">-</span>
+          <span class="tag-icon">Vaga 2</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BETDASORTE (1 Vaga) -->
+    <div class="house-box">
+      <span class="house-badge badge-betdasorte">BetdaSorte — 1 Colaborador</span>
+      <div class="slots-list">
+        <div class="slot-card" id="card-betdasorte" onclick="trocarAgente('betdasorte')">
+          <span id="txt-betdasorte">-</span>
+          <span class="tag-icon">Vaga Única</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- GANHEIBET (2 Vagas) -->
+    <div class="house-box">
+      <span class="house-badge badge-ganheibet">Ganheibet — 2 Colaboradores</span>
+      <div class="slots-list">
+        <div class="slot-card" id="card-ganheibet1" onclick="trocarAgente('ganheibet1')">
+          <span id="txt-ganheibet1">-</span>
+          <span class="tag-icon">Vaga 1</span>
+        </div>
+        <div class="slot-card" id="card-ganheibet2" onclick="trocarAgente('ganheibet2')">
+          <span id="txt-ganheibet2">-</span>
+          <span class="tag-icon">Vaga 2</span>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <table class="escala-table">
-    <thead>
-      <tr>
-        <th>HORÁRIO</th>
-        <th>PIXBET</th>
-        <th>BETDASORTE</th>
-        <th>GANHEIBET</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody">
-    </tbody>
-  </table>
-
-  <h3>Equipe & Observações (Preencha os nomes para o sorteio)</h3>
-  <div class="notes-grid">
-    <div class="note-box"><label>Caixa 1:</label><textarea id="note1" class="note-input" placeholder="Nome 1"></textarea></div>
-    <div class="note-box"><label>Caixa 2:</label><textarea id="note2" class="note-input" placeholder="Nome 2"></textarea></div>
-    <div class="note-box"><label>Caixa 3:</label><textarea id="note3" class="note-input" placeholder="Nome 3"></textarea></div>
-    <div class="note-box"><label>Caixa 4:</label><textarea id="note4" class="note-input" placeholder="Nome 4"></textarea></div>
-    <div class="note-box"><label>Caixa 5:</label><textarea id="note5" class="note-input" placeholder="Nome 5"></textarea></div>
-    <div class="note-box"><label>Caixa 6:</label><textarea id="note6" class="note-input" placeholder="Nome 6"></textarea></div>
+  <!-- Painel de Equipe (5 Colaboradores) -->
+  <div class="team-panel">
+    <div class="panel-header">Equipe do Dia (5 Colaboradores)</div>
+    <div class="team-grid">
+      <div class="team-input-box">
+        <label>Colaborador 1</label>
+        <input type="text" id="note1" class="note-input" placeholder="Nome 1">
+      </div>
+      <div class="team-input-box">
+        <label>Colaborador 2</label>
+        <input type="text" id="note2" class="note-input" placeholder="Nome 2">
+      </div>
+      <div class="team-input-box">
+        <label>Colaborador 3</label>
+        <input type="text" id="note3" class="note-input" placeholder="Nome 3">
+      </div>
+      <div class="team-input-box">
+        <label>Colaborador 4</label>
+        <input type="text" id="note4" class="note-input" placeholder="Nome 4">
+      </div>
+      <div class="team-input-box">
+        <label>Colaborador 5</label>
+        <input type="text" id="note5" class="note-input" placeholder="Nome 5">
+      </div>
+    </div>
   </div>
 
   <script type="module">
@@ -229,119 +374,92 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const horarios = ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"];
-    const casas = ["pixbet", "betdasorte", "ganheibet"];
-
-    const today = new Date().toLocaleDateString('pt-BR');
-    document.getElementById('lblReportDate').innerHTML = `<strong>Relatório do Dia (${today}):</strong>`;
+    const todayStr = new Date().toLocaleDateString('pt-BR');
+    document.getElementById('subDate').innerText = `Gestão Diária — ${todayStr}`;
+    document.getElementById('lblReportDate').innerText = `Relatório Operacional (${todayStr})`;
 
     let escalaGlobal = {};
+    let isEditable = false;
 
     const escalaRef = ref(db, 'escala_ra/atual');
     const reportRef = ref(db, 'escala_ra/relatorio');
     const notesRef = ref(db, 'escala_ra/notas');
 
-    // Sincronização da Escala
+    // Sincronização do Firebase em Tempo Real
     onValue(escalaRef, (snapshot) => {
       escalaGlobal = snapshot.val() || {};
-      renderizarTabela();
+      renderizarEscala();
     });
 
-    function renderizarTabela() {
-      const tbody = document.getElementById('tableBody');
-      tbody.innerHTML = '';
+    function renderizarEscala() {
+      const slots = ['pixbet1', 'pixbet2', 'betdasorte', 'ganheibet1', 'ganheibet2'];
+      
+      slots.forEach(slot => {
+        const txtEl = document.getElementById(`txt-${slot}`);
+        const cardEl = document.getElementById(`card-${slot}`);
+        const nome = escalaGlobal[slot] || '-';
+        
+        txtEl.innerText = nome;
 
-      horarios.forEach(hora => {
-        const tr = document.createElement('tr');
-        let rowHTML = `<td class="time-cell">${hora}</td>`;
-
-        casas.forEach(casa => {
-          const nomeAgente = (escalaGlobal[hora] && escalaGlobal[hora][casa]) ? escalaGlobal[hora][casa] : '-';
-          rowHTML += `
-            <td>
-              <div class="agent-pill ${isEditable ? 'editable' : ''}" 
-                   onclick="trocarAgente('${hora}', '${casa}', '${nomeAgente}')">
-                ${nomeAgente}
-              </div>
-            </td>`;
-        });
-
-        tr.innerHTML = rowHTML;
-        tbody.appendChild(tr);
+        if (isEditable) {
+          cardEl.classList.add('editable');
+        } else {
+          cardEl.classList.remove('editable');
+        }
       });
     }
 
-    function obterColaboradoresDasCaixas() {
-      const lista = [];
-      for (let i = 1; i <= 6; i++) {
-        const valor = document.getElementById(`note${i}`).value.trim();
-        if (valor !== '') lista.push(valor);
+    function obterEquipe() {
+      const equipe = [];
+      for (let i = 1; i <= 5; i++) {
+        const val = document.getElementById(`note${i}`).value.trim();
+        if (val !== '') equipe.push(val);
       }
-      return lista;
+      return equipe;
     }
 
-    // EMBARALHAMENTO JUSTO (Fisher-Yates Shuffle)
-    function embaralharArray(arr) {
-      const copia = [...arr];
-      for (let i = copia.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copia[i], copia[j]] = [copia[j], copia[i]];
-      }
-      return copia;
-    }
-
-    // ALGORITMO IGUALITÁRIO DE RODÍZIO HORA A HORA
+    // Algoritmo de Rodízio Diário (Usa o dia do mês para garantir alternância mensal)
     document.getElementById('btnSorteio').addEventListener('click', () => {
-      const equipe = obterColaboradoresDasCaixas();
+      const equipe = obterEquipe();
 
-      if (equipe.length < 3) {
-        alert("Cadastre pelo menos 3 colaboradores nas Caixas de Texto para que o rodízio seja igualitário!");
+      if (equipe.length !== 5) {
+        alert("Preencha exatamente os 5 colaboradores para realizar o rodízio!");
         return;
       }
 
-      const escalaPayload = {};
-      
-      // 1. Embaralha totalmente a ordem inicial (independe de qual caixa foi preenchida)
-      let filaRodizio = embaralharArray(equipe);
+      // Embaralha a lista inicial
+      let listaModificada = [...equipe].sort(() => Math.random() - 0.5);
 
-      // Deslocamento diário baseado na data para gerar variação diária/mensal
-      const deslocamentoDia = new Date().getDate() % equipe.length;
-      for (let d = 0; d < deslocamentoDia; d++) {
-        filaRodizio.push(filaRodizio.shift());
+      // Deslocamento mensal baseado no dia atual para evitar repetições contínuas
+      const diaDoMes = new Date().getDate();
+      const deslocamento = diaDoMes % 5;
+      
+      for (let i = 0; i < deslocamento; i++) {
+        listaModificada.push(listaModificada.shift());
       }
 
-      let ponteiro = 0;
+      const payload = {
+        pixbet1: listaModificada[0],
+        pixbet2: listaModificada[1],
+        betdasorte: listaModificada[2],
+        ganheibet1: listaModificada[3],
+        ganheibet2: listaModificada[4]
+      };
 
-      horarios.forEach(hora => {
-        const alocacaoHora = [];
-
-        // Seleciona os 3 colaboradores subsequentes na fila circular
-        for (let c = 0; c < 3; c++) {
-          alocacaoHora.push(filaRodizio[ponteiro % filaRodizio.length]);
-          ponteiro++;
-        }
-
-        // Embaralha quem fica em qual casa dentro da hora específica
-        const casasEmbaralhadas = embaralharArray(alocacaoHora);
-
-        escalaPayload[hora] = {
-          pixbet: casasEmbaralhadas[0],
-          betdasorte: casasEmbaralhadas[1],
-          ganheibet: casasEmbaralhadas[2]
-        };
-      });
-
-      set(escalaRef, escalaPayload);
+      set(escalaRef, payload);
     });
 
-    window.trocarAgente = function(hora, casa, nomeAtual) {
+    // Edição Direta (Clique para alterar quando liberado)
+    window.trocarAgente = function(slot) {
       if (!isEditable) return;
-      const novoNome = prompt(`Alterar colaborador para ${casa.toUpperCase()} às ${hora}:`, nomeAtual);
+      const nomeAtual = escalaGlobal[slot] || '';
+      const novoNome = prompt("Alterar colaborador desta vaga:", nomeAtual);
       if (novoNome !== null && novoNome.trim() !== '') {
-        set(ref(db, `escala_ra/atual/${hora}/${casa}`), novoNome.trim());
+        set(ref(db, `escala_ra/atual/${slot}`), novoNome.trim());
       }
     };
 
+    // Sincronização de Relatório e Nomes
     onValue(reportRef, (snapshot) => {
       if (document.activeElement !== document.getElementById('txtReport')) {
         document.getElementById('txtReport').value = snapshot.val() || '';
@@ -350,7 +468,7 @@
 
     onValue(notesRef, (snapshot) => {
       const notes = snapshot.val() || {};
-      for (let i = 1; i <= 6; i++) {
+      for (let i = 1; i <= 5; i++) {
         const el = document.getElementById(`note${i}`);
         if (document.activeElement !== el) {
           el.value = notes[`note${i}`] || '';
@@ -363,12 +481,14 @@
     document.querySelectorAll('.note-input').forEach(el => {
       el.addEventListener('input', () => {
         const payload = {};
-        for (let i = 1; i <= 6; i++) payload[`note${i}`] = document.getElementById(`note${i}`).value;
+        for (let i = 1; i <= 5; i++) {
+          payload[`note${i}`] = document.getElementById(`note${i}`).value;
+        }
         set(notesRef, payload);
       });
     });
 
-    let isEditable = false;
+    // Controle Admin
     const btnUnlock = document.getElementById('btnUnlock');
     const btnLock = document.getElementById('btnLock');
     const adminPassword = document.getElementById('adminPassword');
@@ -377,11 +497,11 @@
     btnUnlock.addEventListener('click', () => {
       if (adminPassword.value === '1234') {
         isEditable = true;
-        lockStatus.innerHTML = '🔓 <strong>Modo: Edição Liberada (Clique para alterar)</strong>';
+        lockStatus.innerHTML = '🔓 Status: <strong style="color:#eab308;">Edição Liberada</strong>';
         btnUnlock.style.display = 'none';
         btnLock.style.display = 'inline-block';
         adminPassword.value = '';
-        renderizarTabela();
+        renderizarEscala();
       } else {
         alert('Senha incorreta!');
       }
@@ -389,10 +509,10 @@
 
     btnLock.addEventListener('click', () => {
       isEditable = false;
-      lockStatus.innerHTML = '🔒 <strong>Modo: Bloqueado (Apenas Leitura)</strong>';
+      lockStatus.innerHTML = '🔒 Status: <strong>Bloqueado (Leitura)</strong>';
       btnUnlock.style.display = 'inline-block';
       btnLock.style.display = 'none';
-      renderizarTabela();
+      renderizarEscala();
     });
   </script>
 </body>
