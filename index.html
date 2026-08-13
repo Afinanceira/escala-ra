@@ -16,9 +16,6 @@
       --accent-gold-hover: #b89628;
       --text-primary: #f1f5f9;
       --text-secondary: #94a3b8;
-      --card-pixbet: #1e3a8a;
-      --card-betdasorte: #065f46;
-      --card-ganheibet: #854d0e;
       --card-border: rgba(255, 255, 255, 0.12);
     }
 
@@ -159,7 +156,7 @@
       border: 1px solid var(--panel-border);
       border-radius: 8px;
       padding: 16px;
-      min-height: 200px;
+      min-height: 220px;
     }
 
     .house-badge {
@@ -221,7 +218,7 @@
 
     .team-grid {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(6, 1fr);
       gap: 12px;
       margin-top: 12px;
     }
@@ -286,11 +283,11 @@
     </div>
   </div>
 
-  <!-- Casas da Operação -->
+  <!-- Casas da Operação (3 Categorias / 6 Vagas Totais) -->
   <div class="houses-container">
     <!-- PIXBET (2 Vagas) -->
     <div class="house-box">
-      <span class="house-badge badge-pixbet">Pixbet — 2 Colaboradores</span>
+      <span class="house-badge badge-pixbet">Pixbet — 2 Vagas</span>
       <div class="slots-list">
         <div class="slot-card" id="card-pixbet1" onclick="trocarAgente('pixbet1')">
           <span id="txt-pixbet1">-</span>
@@ -303,20 +300,24 @@
       </div>
     </div>
 
-    <!-- BETDASORTE (1 Vaga) -->
+    <!-- BETDASORTE (2 Vagas) -->
     <div class="house-box">
-      <span class="house-badge badge-betdasorte">BetdaSorte — 1 Colaborador</span>
+      <span class="house-badge badge-betdasorte">BetdaSorte — 2 Vagas</span>
       <div class="slots-list">
-        <div class="slot-card" id="card-betdasorte" onclick="trocarAgente('betdasorte')">
-          <span id="txt-betdasorte">-</span>
-          <span class="tag-icon">Vaga Única</span>
+        <div class="slot-card" id="card-betdasorte1" onclick="trocarAgente('betdasorte1')">
+          <span id="txt-betdasorte1">-</span>
+          <span class="tag-icon">Vaga 1</span>
+        </div>
+        <div class="slot-card" id="card-betdasorte2" onclick="trocarAgente('betdasorte2')">
+          <span id="txt-betdasorte2">-</span>
+          <span class="tag-icon">Vaga 2</span>
         </div>
       </div>
     </div>
 
     <!-- GANHEIBET (2 Vagas) -->
     <div class="house-box">
-      <span class="house-badge badge-ganheibet">Ganheibet — 2 Colaboradores</span>
+      <span class="house-badge badge-ganheibet">Ganheibet — 2 Vagas</span>
       <div class="slots-list">
         <div class="slot-card" id="card-ganheibet1" onclick="trocarAgente('ganheibet1')">
           <span id="txt-ganheibet1">-</span>
@@ -330,9 +331,9 @@
     </div>
   </div>
 
-  <!-- Painel de Equipe (5 Colaboradores) -->
+  <!-- Painel de Equipe (6 Colaboradores) -->
   <div class="team-panel">
-    <div class="panel-header">Equipe do Dia (5 Colaboradores)</div>
+    <div class="panel-header">Equipe do Dia (6 Colaboradores)</div>
     <div class="team-grid">
       <div class="team-input-box">
         <label>Colaborador 1</label>
@@ -354,12 +355,16 @@
         <label>Colaborador 5</label>
         <input type="text" id="note5" class="note-input" placeholder="Nome 5">
       </div>
+      <div class="team-input-box">
+        <label>Colaborador 6</label>
+        <input type="text" id="note6" class="note-input" placeholder="Nome 6">
+      </div>
     </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, set, get, child, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyC-Siu-U7Z9-arpi1wWL5kV6pdV3COjYQk",
@@ -381,6 +386,13 @@
     let escalaGlobal = {};
     let isEditable = false;
 
+    const slotsList = ['pixbet1', 'pixbet2', 'betdasorte1', 'betdasorte2', 'ganheibet1', 'ganheibet2'];
+    const casasMapping = {
+      pixbet1: 'Pixbet', pixbet2: 'Pixbet',
+      betdasorte1: 'BetdaSorte', betdasorte2: 'BetdaSorte',
+      ganheibet1: 'Ganheibet', ganheibet2: 'Ganheibet'
+    };
+
     const escalaRef = ref(db, 'escala_ra/atual');
     const reportRef = ref(db, 'escala_ra/relatorio');
     const notesRef = ref(db, 'escala_ra/notas');
@@ -392,61 +404,94 @@
     });
 
     function renderizarEscala() {
-      const slots = ['pixbet1', 'pixbet2', 'betdasorte', 'ganheibet1', 'ganheibet2'];
-      
-      slots.forEach(slot => {
+      slotsList.forEach(slot => {
         const txtEl = document.getElementById(`txt-${slot}`);
         const cardEl = document.getElementById(`card-${slot}`);
         const nome = escalaGlobal[slot] || '-';
         
-        txtEl.innerText = nome;
+        if (txtEl) txtEl.innerText = nome;
 
-        if (isEditable) {
-          cardEl.classList.add('editable');
-        } else {
-          cardEl.classList.remove('editable');
+        if (cardEl) {
+          if (isEditable) {
+            cardEl.classList.add('editable');
+          } else {
+            cardEl.classList.remove('editable');
+          }
         }
       });
     }
 
     function obterEquipe() {
       const equipe = [];
-      for (let i = 1; i <= 5; i++) {
+      for (let i = 1; i <= 6; i++) {
         const val = document.getElementById(`note${i}`).value.trim();
         if (val !== '') equipe.push(val);
       }
       return equipe;
     }
 
-    // Algoritmo de Rodízio Diário (Usa o dia do mês para garantir alternância mensal)
-    document.getElementById('btnSorteio').addEventListener('click', () => {
+    // Embaralhamento seguro
+    function embaralhar(arr) {
+      const copia = [...arr];
+      for (let i = copia.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copia[i], copia[j]] = [copia[j], copia[i]];
+      }
+      return copia;
+    }
+
+    // Algoritmo Anti-Repetição Baseado nos Dados do Dia Anterior no Firebase
+    document.getElementById('btnSorteio').addEventListener('click', async () => {
       const equipe = obterEquipe();
 
-      if (equipe.length !== 5) {
-        alert("Preencha exatamente os 5 colaboradores para realizar o rodízio!");
+      if (equipe.length !== 6) {
+        alert("Preencha exatamente os 6 colaboradores para realizar o rodízio igualitário!");
         return;
       }
 
-      // Embaralha a lista inicial
-      let listaModificada = [...equipe].sort(() => Math.random() - 0.5);
+      // Buscar alocação anterior no Firebase
+      const snapshot = await get(escalaRef);
+      const escalaAnterior = snapshot.val() || {};
 
-      // Deslocamento mensal baseado no dia atual para evitar repetições contínuas
-      const diaDoMes = new Date().getDate();
-      const deslocamento = diaDoMes % 5;
-      
-      for (let i = 0; i < deslocamento; i++) {
-        listaModificada.push(listaModificada.shift());
+      // Mapear em qual casa cada colaborador estava ontem
+      const casaAnteriorAgente = {};
+      Object.keys(escalaAnterior).forEach(slot => {
+        const agente = escalaAnterior[slot];
+        if (agente && agente !== '-') {
+          casaAnteriorAgente[agente] = casasMapping[slot];
+        }
+      });
+
+      // Tentar gerar uma combinação onde NINGUÉM repita a mesma casa do dia anterior
+      let melhorCombinacao = null;
+      let tentativas = 0;
+
+      while (tentativas < 100) {
+        tentativas++;
+        const candidatos = embaralhar(equipe);
+        let conflito = false;
+
+        const candidatoPayload = {};
+        slotsList.forEach((slot, index) => {
+          const agente = candidatos[index];
+          const casaDestino = casasMapping[slot];
+
+          // Verifica se o colaborador ficaria na mesma casa de ontem
+          if (casaAnteriorAgente[agente] && casaAnteriorAgente[agente] === casaDestino) {
+            conflito = true;
+          }
+          candidatoPayload[slot] = agente;
+        });
+
+        if (!conflito) {
+          melhorCombinacao = candidatoPayload;
+          break;
+        } else if (!melhorCombinacao) {
+          melhorCombinacao = candidatoPayload; // Fallback caso seja matematicamente impossível zerar conflitos
+        }
       }
 
-      const payload = {
-        pixbet1: listaModificada[0],
-        pixbet2: listaModificada[1],
-        betdasorte: listaModificada[2],
-        ganheibet1: listaModificada[3],
-        ganheibet2: listaModificada[4]
-      };
-
-      set(escalaRef, payload);
+      set(escalaRef, melhorCombinacao);
     });
 
     // Edição Direta (Clique para alterar quando liberado)
@@ -468,7 +513,7 @@
 
     onValue(notesRef, (snapshot) => {
       const notes = snapshot.val() || {};
-      for (let i = 1; i <= 5; i++) {
+      for (let i = 1; i <= 6; i++) {
         const el = document.getElementById(`note${i}`);
         if (document.activeElement !== el) {
           el.value = notes[`note${i}`] || '';
@@ -481,7 +526,7 @@
     document.querySelectorAll('.note-input').forEach(el => {
       el.addEventListener('input', () => {
         const payload = {};
-        for (let i = 1; i <= 5; i++) {
+        for (let i = 1; i <= 6; i++) {
           payload[`note${i}`] = document.getElementById(`note${i}`).value;
         }
         set(notesRef, payload);
