@@ -284,7 +284,7 @@
     </div>
   </div>
 
-  <!-- Casas da Operação (Dinâmicas para 5 Vagas Totais) -->
+  <!-- Casas da Operação -->
   <div class="houses-container">
     <!-- PIXBET -->
     <div class="house-box">
@@ -334,7 +334,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyC-Siu-U7Z9-arpi1wWL5kV6pdV3COjYQk",
@@ -360,7 +360,6 @@
     const reportRef = ref(db, 'escala_ra/relatorio');
     const notesRef = ref(db, 'escala_ra/notas');
 
-    // Esquemas dinâmicos das 5 vagas divididas nas 3 casas (Alternância diária)
     const distribuicoesPossiveis = [
       { pixbet: 2, betdasorte: 1, ganheibet: 2 },
       { pixbet: 2, betdasorte: 2, ganheibet: 1 },
@@ -381,7 +380,6 @@
       cBetdaSorte.innerHTML = '';
       cGanheibet.innerHTML = '';
 
-      // Descobre quais vagas existem no payload atual ou carrega o padrão
       const estruturaAtual = escalaGlobal.estrutura || { pixbet: 2, betdasorte: 1, ganheibet: 2 };
 
       document.getElementById('badge-pixbet').innerText = `Pixbet — ${estruturaAtual.pixbet} ${estruturaAtual.pixbet > 1 ? 'Vagas' : 'Vaga'}`;
@@ -427,78 +425,87 @@
       return copia;
     }
 
-    // Botão Executar Rodízio Diário
-    document.getElementById('btnSorteio').addEventListener('click', async () => {
-      const equipe = obterEquipe();
-
-      if (equipe.length !== 5) {
-        alert("Preencha exatamente os 5 colaboradores para realizar o rodízio!");
+    // Executar Rodízio (Protegido por Senha Admin)
+    document.getElementById('btnSorteio').addEventListener('click', () => {
+      if (!isEditable) {
+        alert("Apenas o administrador pode executar o rodízio. Insira a senha e clique em 'Desbloquear'!");
         return;
       }
 
-      // Consulta Firebase para ler o estado anterior
-      const snapshot = await get(escalaRef);
-      const escalaAnterior = snapshot.val() || {};
+      try {
+        const equipe = obterEquipe();
 
-      // Mapear casa anterior de cada colaborador
-      const casaAnteriorAgente = {};
-      Object.keys(escalaAnterior).forEach(key => {
-        if (key.includes('_')) {
-          const casaNome = key.split('_')[0];
-          const agente = escalaAnterior[key];
-          if (agente && agente !== '-') casaAnteriorAgente[agente] = casaNome;
-        }
-      });
-
-      // Alterna o padrão de distribuição (2-1-2, 2-2-1, 1-2-2)
-      let padraoIdx = (escalaAnterior.padraoIdx !== undefined ? escalaAnterior.padraoIdx + 1 : Math.floor(Math.random() * 3)) % 3;
-      const novaEstrutura = distribuicoesPossiveis[padraoIdx];
-
-      // Tenta gerar permutação onde colaboradores não repitam a mesma casa do dia/geração anterior
-      let melhorPayload = null;
-      let tentativas = 0;
-
-      while (tentativas < 100) {
-        tentativas++;
-        const candidatos = embaralhar(equipe);
-        let conflito = false;
-        let pIndex = 0;
-
-        const tempPayload = { estrutura: novaEstrutura, padraoIdx: padraoIdx };
-
-        // Aloca Pixbet
-        for (let i = 1; i <= novaEstrutura.pixbet; i++) {
-          const agente = candidatos[pIndex++];
-          if (casaAnteriorAgente[agente] === 'pixbet') conflito = true;
-          tempPayload[`pixbet_${i}`] = agente;
-        }
-        // Aloca BetdaSorte
-        for (let i = 1; i <= novaEstrutura.betdasorte; i++) {
-          const agente = candidatos[pIndex++];
-          if (casaAnteriorAgente[agente] === 'betdasorte') conflito = true;
-          tempPayload[`betdasorte_${i}`] = agente;
-        }
-        // Aloca Ganheibet
-        for (let i = 1; i <= novaEstrutura.ganheibet; i++) {
-          const agente = candidatos[pIndex++];
-          if (casaAnteriorAgente[agente] === 'ganheibet') conflito = true;
-          tempPayload[`ganheibet_${i}`] = agente;
+        if (equipe.length !== 5) {
+          alert("Preencha exatamente os 5 colaboradores nas caixas abaixo para realizar o rodízio!");
+          return;
         }
 
-        if (!conflito) {
-          melhorPayload = tempPayload;
-          break;
-        } else if (!melhorPayload) {
-          melhorPayload = tempPayload;
+        const escalaAnterior = escalaGlobal || {};
+
+        // Mapear casa anterior
+        const casaAnteriorAgente = {};
+        Object.keys(escalaAnterior).forEach(key => {
+          if (key.includes('_')) {
+            const casaNome = key.split('_')[0];
+            const agente = escalaAnterior[key];
+            if (agente && agente !== '-') casaAnteriorAgente[agente] = casaNome;
+          }
+        });
+
+        const padraoAnterior = typeof escalaAnterior.padraoIdx === 'number' ? escalaAnterior.padraoIdx : 0;
+        const padraoIdx = (padraoAnterior + 1) % 3;
+        const novaEstrutura = distribuicoesPossiveis[padraoIdx];
+
+        let melhorPayload = null;
+        let tentativas = 0;
+
+        while (tentativas < 100) {
+          tentativas++;
+          const candidatos = embaralhar(equipe);
+          let conflito = false;
+          let pIndex = 0;
+
+          const tempPayload = { estrutura: novaEstrutura, padraoIdx: padraoIdx };
+
+          for (let i = 1; i <= novaEstrutura.pixbet; i++) {
+            const agente = candidatos[pIndex++];
+            if (casaAnteriorAgente[agente] === 'pixbet') conflito = true;
+            tempPayload[`pixbet_${i}`] = agente;
+          }
+          for (let i = 1; i <= novaEstrutura.betdasorte; i++) {
+            const agente = candidatos[pIndex++];
+            if (casaAnteriorAgente[agente] === 'betdasorte') conflito = true;
+            tempPayload[`betdasorte_${i}`] = agente;
+          }
+          for (let i = 1; i <= novaEstrutura.ganheibet; i++) {
+            const agente = candidatos[pIndex++];
+            if (casaAnteriorAgente[agente] === 'ganheibet') conflito = true;
+            tempPayload[`ganheibet_${i}`] = agente;
+          }
+
+          if (!conflito) {
+            melhorPayload = tempPayload;
+            break;
+          } else if (!melhorPayload) {
+            melhorPayload = tempPayload;
+          }
         }
+
+        set(escalaRef, melhorPayload);
+      } catch (err) {
+        console.error("Erro no rodízio:", err);
+        alert("Erro ao executar rodízio: " + err.message);
       }
-
-      set(escalaRef, melhorPayload);
     });
 
-    // Botão Limpar Escala
+    // Limpar Escala (Protegido por Senha Admin)
     document.getElementById('btnLimpar').addEventListener('click', () => {
-      if (confirm("Tem certeza que deseja limpar a escala atual?")) {
+      if (!isEditable) {
+        alert("Apenas o administrador pode limpar a escala. Insira a senha e clique em 'Desbloquear'!");
+        return;
+      }
+
+      if (confirm("Deseja realmente limpar a escala exibida?")) {
         set(escalaRef, {
           estrutura: { pixbet: 2, betdasorte: 1, ganheibet: 2 },
           pixbet_1: '-', pixbet_2: '-',
