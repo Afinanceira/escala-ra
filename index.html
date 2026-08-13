@@ -53,11 +53,16 @@
       margin-top: 3px;
     }
 
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+
     .btn {
       font-family: inherit;
       font-size: 0.85rem;
       font-weight: 600;
-      padding: 9px 18px;
+      padding: 9px 16px;
       border-radius: 6px;
       border: none;
       cursor: pointer;
@@ -67,14 +72,11 @@
       gap: 8px;
     }
 
-    .btn-primary {
-      background-color: var(--accent-gold);
-      color: #000;
-    }
-
-    .btn-primary:hover {
-      background-color: var(--accent-gold-hover);
-    }
+    .btn-primary { background-color: var(--accent-gold); color: #000; }
+    .btn-primary:hover { background-color: var(--accent-gold-hover); }
+    
+    .btn-clear { background-color: #334155; color: #f8fafc; }
+    .btn-clear:hover { background-color: #475569; }
 
     .btn-lock { background-color: #ef4444; color: #fff; }
     .btn-unlock { background-color: #eab308; color: #000; }
@@ -117,9 +119,7 @@
       outline: none;
     }
 
-    textarea.report-input:focus {
-      border-color: var(--accent-gold);
-    }
+    textarea.report-input:focus { border-color: var(--accent-gold); }
 
     .admin-box {
       display: flex;
@@ -156,7 +156,7 @@
       border: 1px solid var(--panel-border);
       border-radius: 8px;
       padding: 16px;
-      min-height: 220px;
+      min-height: 200px;
     }
 
     .house-badge {
@@ -198,9 +198,7 @@
       border-color: var(--accent-gold);
     }
 
-    .slot-card.editable:hover {
-      background: #1e293b;
-    }
+    .slot-card.editable:hover { background: #1e293b; }
 
     .slot-card .tag-icon {
       font-size: 0.75rem;
@@ -208,7 +206,7 @@
       font-weight: 400;
     }
 
-    /* Caixas de Observação / Equipe */
+    /* Painel da Equipe */
     .team-panel {
       background: var(--panel-bg);
       border: 1px solid var(--panel-border);
@@ -218,7 +216,7 @@
 
     .team-grid {
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 12px;
       margin-top: 12px;
     }
@@ -243,9 +241,7 @@
       outline: none;
     }
 
-    .team-input-box input:focus {
-      border-color: var(--accent-gold);
-    }
+    .team-input-box input:focus { border-color: var(--accent-gold); }
   </style>
 </head>
 <body>
@@ -256,9 +252,14 @@
       <h1>Escala Reclame Aqui — Turno Único (09:00 às 17:00)</h1>
       <p id="subDate">Gestão Diária de Operação e Rodízio Balanceado</p>
     </div>
-    <button class="btn btn-primary" id="btnSorteio">
-      🔄 Executar Rodízio Diário
-    </button>
+    <div class="header-actions">
+      <button class="btn btn-clear" id="btnLimpar">
+        🧹 Limpar Escala
+      </button>
+      <button class="btn btn-primary" id="btnSorteio">
+        🔄 Executar Rodízio Diário
+      </button>
+    </div>
   </div>
 
   <!-- Painel de Relatório e Trava Admin -->
@@ -283,57 +284,30 @@
     </div>
   </div>
 
-  <!-- Casas da Operação (3 Categorias / 6 Vagas Totais) -->
+  <!-- Casas da Operação (Dinâmicas para 5 Vagas Totais) -->
   <div class="houses-container">
-    <!-- PIXBET (2 Vagas) -->
+    <!-- PIXBET -->
     <div class="house-box">
-      <span class="house-badge badge-pixbet">Pixbet — 2 Vagas</span>
-      <div class="slots-list">
-        <div class="slot-card" id="card-pixbet1" onclick="trocarAgente('pixbet1')">
-          <span id="txt-pixbet1">-</span>
-          <span class="tag-icon">Vaga 1</span>
-        </div>
-        <div class="slot-card" id="card-pixbet2" onclick="trocarAgente('pixbet2')">
-          <span id="txt-pixbet2">-</span>
-          <span class="tag-icon">Vaga 2</span>
-        </div>
-      </div>
+      <span class="house-badge badge-pixbet" id="badge-pixbet">Pixbet</span>
+      <div class="slots-list" id="container-pixbet"></div>
     </div>
 
-    <!-- BETDASORTE (2 Vagas) -->
+    <!-- BETDASORTE -->
     <div class="house-box">
-      <span class="house-badge badge-betdasorte">BetdaSorte — 2 Vagas</span>
-      <div class="slots-list">
-        <div class="slot-card" id="card-betdasorte1" onclick="trocarAgente('betdasorte1')">
-          <span id="txt-betdasorte1">-</span>
-          <span class="tag-icon">Vaga 1</span>
-        </div>
-        <div class="slot-card" id="card-betdasorte2" onclick="trocarAgente('betdasorte2')">
-          <span id="txt-betdasorte2">-</span>
-          <span class="tag-icon">Vaga 2</span>
-        </div>
-      </div>
+      <span class="house-badge badge-betdasorte" id="badge-betdasorte">BetdaSorte</span>
+      <div class="slots-list" id="container-betdasorte"></div>
     </div>
 
-    <!-- GANHEIBET (2 Vagas) -->
+    <!-- GANHEIBET -->
     <div class="house-box">
-      <span class="house-badge badge-ganheibet">Ganheibet — 2 Vagas</span>
-      <div class="slots-list">
-        <div class="slot-card" id="card-ganheibet1" onclick="trocarAgente('ganheibet1')">
-          <span id="txt-ganheibet1">-</span>
-          <span class="tag-icon">Vaga 1</span>
-        </div>
-        <div class="slot-card" id="card-ganheibet2" onclick="trocarAgente('ganheibet2')">
-          <span id="txt-ganheibet2">-</span>
-          <span class="tag-icon">Vaga 2</span>
-        </div>
-      </div>
+      <span class="house-badge badge-ganheibet" id="badge-ganheibet">Ganheibet</span>
+      <div class="slots-list" id="container-ganheibet"></div>
     </div>
   </div>
 
-  <!-- Painel de Equipe (6 Colaboradores) -->
+  <!-- Painel de Equipe (5 Colaboradores) -->
   <div class="team-panel">
-    <div class="panel-header">Equipe do Dia (6 Colaboradores)</div>
+    <div class="panel-header">Equipe do Dia (5 Colaboradores)</div>
     <div class="team-grid">
       <div class="team-input-box">
         <label>Colaborador 1</label>
@@ -355,16 +329,12 @@
         <label>Colaborador 5</label>
         <input type="text" id="note5" class="note-input" placeholder="Nome 5">
       </div>
-      <div class="team-input-box">
-        <label>Colaborador 6</label>
-        <input type="text" id="note6" class="note-input" placeholder="Nome 6">
-      </div>
     </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set, get, child, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyC-Siu-U7Z9-arpi1wWL5kV6pdV3COjYQk",
@@ -386,51 +356,68 @@
     let escalaGlobal = {};
     let isEditable = false;
 
-    const slotsList = ['pixbet1', 'pixbet2', 'betdasorte1', 'betdasorte2', 'ganheibet1', 'ganheibet2'];
-    const casasMapping = {
-      pixbet1: 'Pixbet', pixbet2: 'Pixbet',
-      betdasorte1: 'BetdaSorte', betdasorte2: 'BetdaSorte',
-      ganheibet1: 'Ganheibet', ganheibet2: 'Ganheibet'
-    };
-
     const escalaRef = ref(db, 'escala_ra/atual');
     const reportRef = ref(db, 'escala_ra/relatorio');
     const notesRef = ref(db, 'escala_ra/notas');
 
-    // Sincronização do Firebase em Tempo Real
+    // Esquemas dinâmicos das 5 vagas divididas nas 3 casas (Alternância diária)
+    const distribuicoesPossiveis = [
+      { pixbet: 2, betdasorte: 1, ganheibet: 2 },
+      { pixbet: 2, betdasorte: 2, ganheibet: 1 },
+      { pixbet: 1, betdasorte: 2, ganheibet: 2 }
+    ];
+
     onValue(escalaRef, (snapshot) => {
       escalaGlobal = snapshot.val() || {};
       renderizarEscala();
     });
 
     function renderizarEscala() {
-      slotsList.forEach(slot => {
-        const txtEl = document.getElementById(`txt-${slot}`);
-        const cardEl = document.getElementById(`card-${slot}`);
-        const nome = escalaGlobal[slot] || '-';
-        
-        if (txtEl) txtEl.innerText = nome;
+      const cPixbet = document.getElementById('container-pixbet');
+      const cBetdaSorte = document.getElementById('container-betdasorte');
+      const cGanheibet = document.getElementById('container-ganheibet');
 
-        if (cardEl) {
-          if (isEditable) {
-            cardEl.classList.add('editable');
-          } else {
-            cardEl.classList.remove('editable');
-          }
-        }
-      });
+      cPixbet.innerHTML = '';
+      cBetdaSorte.innerHTML = '';
+      cGanheibet.innerHTML = '';
+
+      // Descobre quais vagas existem no payload atual ou carrega o padrão
+      const estruturaAtual = escalaGlobal.estrutura || { pixbet: 2, betdasorte: 1, ganheibet: 2 };
+
+      document.getElementById('badge-pixbet').innerText = `Pixbet — ${estruturaAtual.pixbet} ${estruturaAtual.pixbet > 1 ? 'Vagas' : 'Vaga'}`;
+      document.getElementById('badge-betdasorte').innerText = `BetdaSorte — ${estruturaAtual.betdasorte} ${estruturaAtual.betdasorte > 1 ? 'Vagas' : 'Vaga'}`;
+      document.getElementById('badge-ganheibet').innerText = `Ganheibet — ${estruturaAtual.ganheibet} ${estruturaAtual.ganheibet > 1 ? 'Vagas' : 'Vaga'}`;
+
+      const criarSlotCard = (slotId, label) => {
+        const card = document.createElement('div');
+        card.className = `slot-card ${isEditable ? 'editable' : ''}`;
+        card.onclick = () => trocarAgente(slotId);
+
+        const nome = escalaGlobal[slotId] || '-';
+        card.innerHTML = `<span>${nome}</span><span class="tag-icon">${label}</span>`;
+        return card;
+      };
+
+      for (let i = 1; i <= estruturaAtual.pixbet; i++) {
+        cPixbet.appendChild(criarSlotCard(`pixbet_${i}`, `Vaga ${i}`));
+      }
+      for (let i = 1; i <= estruturaAtual.betdasorte; i++) {
+        cBetdaSorte.appendChild(criarSlotCard(`betdasorte_${i}`, `Vaga ${i}`));
+      }
+      for (let i = 1; i <= estruturaAtual.ganheibet; i++) {
+        cGanheibet.appendChild(criarSlotCard(`ganheibet_${i}`, `Vaga ${i}`));
+      }
     }
 
     function obterEquipe() {
       const equipe = [];
-      for (let i = 1; i <= 6; i++) {
+      for (let i = 1; i <= 5; i++) {
         const val = document.getElementById(`note${i}`).value.trim();
         if (val !== '') equipe.push(val);
       }
       return equipe;
     }
 
-    // Embaralhamento seguro
     function embaralhar(arr) {
       const copia = [...arr];
       for (let i = copia.length - 1; i > 0; i--) {
@@ -440,67 +427,94 @@
       return copia;
     }
 
-    // Algoritmo Anti-Repetição Baseado nos Dados do Dia Anterior no Firebase
+    // Botão Executar Rodízio Diário
     document.getElementById('btnSorteio').addEventListener('click', async () => {
       const equipe = obterEquipe();
 
-      if (equipe.length !== 6) {
-        alert("Preencha exatamente os 6 colaboradores para realizar o rodízio igualitário!");
+      if (equipe.length !== 5) {
+        alert("Preencha exatamente os 5 colaboradores para realizar o rodízio!");
         return;
       }
 
-      // Buscar alocação anterior no Firebase
+      // Consulta Firebase para ler o estado anterior
       const snapshot = await get(escalaRef);
       const escalaAnterior = snapshot.val() || {};
 
-      // Mapear em qual casa cada colaborador estava ontem
+      // Mapear casa anterior de cada colaborador
       const casaAnteriorAgente = {};
-      Object.keys(escalaAnterior).forEach(slot => {
-        const agente = escalaAnterior[slot];
-        if (agente && agente !== '-') {
-          casaAnteriorAgente[agente] = casasMapping[slot];
+      Object.keys(escalaAnterior).forEach(key => {
+        if (key.includes('_')) {
+          const casaNome = key.split('_')[0];
+          const agente = escalaAnterior[key];
+          if (agente && agente !== '-') casaAnteriorAgente[agente] = casaNome;
         }
       });
 
-      // Tentar gerar uma combinação onde NINGUÉM repita a mesma casa do dia anterior
-      let melhorCombinacao = null;
+      // Alterna o padrão de distribuição (2-1-2, 2-2-1, 1-2-2)
+      let padraoIdx = (escalaAnterior.padraoIdx !== undefined ? escalaAnterior.padraoIdx + 1 : Math.floor(Math.random() * 3)) % 3;
+      const novaEstrutura = distribuicoesPossiveis[padraoIdx];
+
+      // Tenta gerar permutação onde colaboradores não repitam a mesma casa do dia/geração anterior
+      let melhorPayload = null;
       let tentativas = 0;
 
       while (tentativas < 100) {
         tentativas++;
         const candidatos = embaralhar(equipe);
         let conflito = false;
+        let pIndex = 0;
 
-        const candidatoPayload = {};
-        slotsList.forEach((slot, index) => {
-          const agente = candidatos[index];
-          const casaDestino = casasMapping[slot];
+        const tempPayload = { estrutura: novaEstrutura, padraoIdx: padraoIdx };
 
-          // Verifica se o colaborador ficaria na mesma casa de ontem
-          if (casaAnteriorAgente[agente] && casaAnteriorAgente[agente] === casaDestino) {
-            conflito = true;
-          }
-          candidatoPayload[slot] = agente;
-        });
+        // Aloca Pixbet
+        for (let i = 1; i <= novaEstrutura.pixbet; i++) {
+          const agente = candidatos[pIndex++];
+          if (casaAnteriorAgente[agente] === 'pixbet') conflito = true;
+          tempPayload[`pixbet_${i}`] = agente;
+        }
+        // Aloca BetdaSorte
+        for (let i = 1; i <= novaEstrutura.betdasorte; i++) {
+          const agente = candidatos[pIndex++];
+          if (casaAnteriorAgente[agente] === 'betdasorte') conflito = true;
+          tempPayload[`betdasorte_${i}`] = agente;
+        }
+        // Aloca Ganheibet
+        for (let i = 1; i <= novaEstrutura.ganheibet; i++) {
+          const agente = candidatos[pIndex++];
+          if (casaAnteriorAgente[agente] === 'ganheibet') conflito = true;
+          tempPayload[`ganheibet_${i}`] = agente;
+        }
 
         if (!conflito) {
-          melhorCombinacao = candidatoPayload;
+          melhorPayload = tempPayload;
           break;
-        } else if (!melhorCombinacao) {
-          melhorCombinacao = candidatoPayload; // Fallback caso seja matematicamente impossível zerar conflitos
+        } else if (!melhorPayload) {
+          melhorPayload = tempPayload;
         }
       }
 
-      set(escalaRef, melhorCombinacao);
+      set(escalaRef, melhorPayload);
     });
 
-    // Edição Direta (Clique para alterar quando liberado)
-    window.trocarAgente = function(slot) {
+    // Botão Limpar Escala
+    document.getElementById('btnLimpar').addEventListener('click', () => {
+      if (confirm("Tem certeza que deseja limpar a escala atual?")) {
+        set(escalaRef, {
+          estrutura: { pixbet: 2, betdasorte: 1, ganheibet: 2 },
+          pixbet_1: '-', pixbet_2: '-',
+          betdasorte_1: '-',
+          ganheibet_1: '-', ganheibet_2: '-'
+        });
+      }
+    });
+
+    // Edição Manual
+    window.trocarAgente = function(slotId) {
       if (!isEditable) return;
-      const nomeAtual = escalaGlobal[slot] || '';
+      const nomeAtual = escalaGlobal[slotId] || '';
       const novoNome = prompt("Alterar colaborador desta vaga:", nomeAtual);
       if (novoNome !== null && novoNome.trim() !== '') {
-        set(ref(db, `escala_ra/atual/${slot}`), novoNome.trim());
+        set(ref(db, `escala_ra/atual/${slotId}`), novoNome.trim());
       }
     };
 
@@ -513,7 +527,7 @@
 
     onValue(notesRef, (snapshot) => {
       const notes = snapshot.val() || {};
-      for (let i = 1; i <= 6; i++) {
+      for (let i = 1; i <= 5; i++) {
         const el = document.getElementById(`note${i}`);
         if (document.activeElement !== el) {
           el.value = notes[`note${i}`] || '';
@@ -526,7 +540,7 @@
     document.querySelectorAll('.note-input').forEach(el => {
       el.addEventListener('input', () => {
         const payload = {};
-        for (let i = 1; i <= 6; i++) {
+        for (let i = 1; i <= 5; i++) {
           payload[`note${i}`] = document.getElementById(`note${i}`).value;
         }
         set(notesRef, payload);
